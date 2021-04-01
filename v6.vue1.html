@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="./1.js"></script>
+</head>
+<body>
+  <div id="app">
+    <h1>内部指令</h1>
+    <p v-text="a"></p>
+
+    <h1>业务拓展指令</h1>
+    <p v-html="a">
+
+    </p>
+    <h1>computed</h1>
+    <p v-text="b"></p>
+  </div>
+</body>
+<script>
+/**
+ * 通过访问器属性 get ，依次进入
+ * 1. 访问器属性
+ * 2. 根据 Dep.target 判断是否需要进行 监听 【依赖收集】
+ * 
+ * 通过访问器属性 set ，依次进入
+ * 1. 访问器属性
+ * 2. observe 【对象监听】
+ * 3. 通知
+ *  - 通知所有watcher
+ *    - 注入消息队列 【flushBatcherQueue】
+ *      - 执行watcher
+ *        - 执行dir.update
+ */ 
+
+const app = new Vue({
+  el:'#app'  ,
+  data:{
+    a:1
+  },
+  watch:{
+    a(v){
+      console.log(v)
+    }
+  },
+  computed:{
+    b(){
+      return 'b:'+this.a 
+    }
+  }
+})
+
+setInterval(()=>{
+app.a ++;
+},1000)
+</script>
+</html>

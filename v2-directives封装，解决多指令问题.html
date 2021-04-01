@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+    <h1>内部指令</h1>
+    <p v-text="a"></p>
+
+    <h1>业务拓展指令</h1>
+    <p v-html="a">
+
+    </p>
+    
+</body>
+<script>
+/**
+ * Object.defineProperty + directives -》 dom
+ * 1个data属性 对应多个个指令
+ *
+ * directives: 解决指令拓展问题
+ * 
+ * 问题：无法使用参数 watch
+ * 1. 封装  --> eventbus 【给一个函数提供到处执行的能力】
+ * 
+ */ 
+
+// 将数据源，转换为双向绑定
+let app = {
+  a:`<p>123</p>`,
+  // 1. 用户拓展
+  directives:{
+    "v-html":{
+      update(dom,v){
+        dom.innerHTML = v
+      }
+    }
+  }
+}
+
+
+// 2. 内部拓展  -- build
+const directives = {
+  "v-text" : {
+    update(dom,v){
+      dom.innerText = v
+    }
+  }
+}
+
+// 3. 合并所有指令
+const mergedDirectives = Object.assign({},app.directives,directives)
+
+// 创建数据源
+app._a = app.a
+
+
+
+// 建立关联
+Object.defineProperty(app,'a',{
+  get(){
+    // 重新设定数据源
+    return app._a;
+  },
+  set(v){
+    app._a = v
+    // 4. 将堆叠代转 转换为 for循环
+    for(let key in mergedDirectives){
+      document.querySelectorAll(`[${key}]`).forEach(dom=>{
+        if(dom.getAttribute(key) === 'a'){
+          mergedDirectives[key].update(dom,v)
+        }
+      })
+    }
+  }
+})
+
+
+// 初始化触发
+app.a = app.a
+
+
+setInterval(()=>{
+  app.a += 1
+},1000)
+</script>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+    <p v-text="a"></p>
+</body>
+<script>
+/**
+ * Object.defineProperty + dom
+ * 1个data属性 对应1个指令
+ * 
+ * 问题：1个data属性 对应多个指令 【尤其是用户拓展】
+ * 
+ * 解决方案：
+ * 1. 封装指令 --》 build 
+ * 2. 调用指令 --》 策略
+ */ 
+// 将数据源，转换为双向绑定
+let app = {
+  a:1
+}
+
+// 1. 创建数据源
+app._a = app.a
+
+// 2. 建立关联
+Object.defineProperty(app,'a',{
+  get(){
+    // 重新设定数据源
+    return app._a;
+  },
+  set(v){
+    document.querySelectorAll('[v-text]').forEach(dom=>{
+      if(dom.getAttribute('v-text') === 'a'){
+        dom.innerText = v
+      }
+    })
+  }
+})
+
+// 3. 初始化触发 
+app.a = app.a
+
+
+setInterval(()=>{
+  app.a ++ 
+},1000)
+</script>
+</html>
